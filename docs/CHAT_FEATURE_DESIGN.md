@@ -28,7 +28,7 @@ The Employee Management Application currently provides CRUD operations for emplo
 - **BR-4**: Ensure message privacy with end-to-end encryption
 - **BR-5**: Scale to support 10,000 concurrent users
 - **BR-6**: Provide message delivery status (sent, delivered, read)
-- **BR-7**: Support message search and filtering
+- **BR-7**: Support message search and filtering (client-side due to E2EE)
 - **BR-8**: Enable presence indicators (online/offline status)
 
 ### 1.3 Technical Requirements
@@ -105,7 +105,7 @@ graph TB
   - Conversation list with unread indicators
   - Typing indicators
   - Message status indicators (sent/delivered/read)
-  - Search and filter functionality
+  - Search and filter functionality (client-side on decrypted messages)
 - **Dependencies**: React, Socket.io-client, libsignal-protocol-javascript
 
 **WebSocket Client Manager**
@@ -271,7 +271,9 @@ CREATE TABLE messages_2026_03 PARTITION OF messages
 
 CREATE INDEX idx_messages_conversation_id ON messages(conversation_id, sent_at DESC);
 CREATE INDEX idx_messages_sender_id ON messages(sender_id);
-CREATE INDEX idx_messages_content_search ON messages USING gin(to_tsvector('english', content_encrypted));
+-- Note: Full-text search on encrypted content is not possible server-side
+-- Search functionality will be implemented client-side after decryption
+-- or using a separate metadata field for searchable tags/keywords
 
 -- Message delivery tracking
 CREATE TABLE message_deliveries (
@@ -502,10 +504,12 @@ Response: { success: true }
 
 ```
 GET /api/chat/search
-Description: Search messages
-Query Params: q (query), conversationId (optional), limit
+Description: Search messages (client-side search on decrypted content)
+Note: Due to E2EE, this endpoint returns message metadata only.
+      Actual content search happens client-side after decryption.
+Query Params: conversationId (optional), before (timestamp), limit
 Response: {
-    results: [...],
+    messages: [...], // Encrypted messages with metadata
     total: 150
 }
 ```
@@ -607,10 +611,10 @@ sequenceDiagram
 **Scaling Approach**:
 
 1. **WebSocket Server Instances**
-   - Deploy 4-6 instances initially (1,500-2,500 users per instance)
+   - Deploy 6 instances initially (~1,667 users per instance with headroom)
    - Auto-scaling based on connection count and CPU/memory
    - Each instance: 4 CPU cores, 8GB RAM
-   - Formula: `instances = ceil(concurrent_users / 2000)`
+   - Formula: `instances = ceil(concurrent_users / 2000) + 20% overhead`
 
 2. **Load Distribution**
    ```
