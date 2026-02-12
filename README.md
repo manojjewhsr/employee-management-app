@@ -128,6 +128,19 @@ The application includes comprehensive error handling:
 - Proper HTTP status codes (200, 201, 400, 404, 409, 500)
 - User-friendly error messages
 - Database connection error handling
+- Rate limiting to prevent API abuse (100 requests per 15 minutes per IP)
+
+## Security
+
+The application implements several security measures:
+- Input validation on both frontend and backend
+- Email format validation
+- Rate limiting on all API endpoints
+- Parameterized SQL queries to prevent SQL injection
+- CORS enabled for cross-origin requests
+- Unique email constraint in database
+
+**Note**: Some npm audit warnings in development dependencies (react-scripts, sqlite3) are known issues in their transitive dependencies and do not affect production deployments.
 
 ## Development
 
