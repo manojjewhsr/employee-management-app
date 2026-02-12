@@ -195,9 +195,10 @@ graph TB
 - **Schema**: See Section 3.2
 - **Features**:
   - ACID compliance for message integrity
-  - Full-text search capability
+  - Full-text search capability (for metadata and system fields)
   - Efficient indexing for queries
   - Partitioning strategy for scale
+  - Note: Message content is E2EE, so content search is client-side only
 
 **Load Balancer (Nginx/HAProxy)**
 - **Responsibility**: Distribute connections across WebSocket servers
