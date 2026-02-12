@@ -45,13 +45,8 @@ function initDatabase() {
   });
 }
 
-// Error handling middleware
-const asyncHandler = (fn) => (req, res, next) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
-};
-
 // GET all employees or filter by department
-app.get('/api/employees', asyncHandler(async (req, res) => {
+app.get('/api/employees', (req, res) => {
   const { department } = req.query;
   
   let query = 'SELECT * FROM employees';
@@ -71,10 +66,10 @@ app.get('/api/employees', asyncHandler(async (req, res) => {
     }
     res.json(rows);
   });
-}));
+});
 
 // GET single employee by ID
-app.get('/api/employees/:id', asyncHandler(async (req, res) => {
+app.get('/api/employees/:id', (req, res) => {
   const { id } = req.params;
   
   db.get('SELECT * FROM employees WHERE id = ?', [id], (err, row) => {
@@ -89,10 +84,10 @@ app.get('/api/employees/:id', asyncHandler(async (req, res) => {
     }
     res.json(row);
   });
-}));
+});
 
 // POST create new employee
-app.post('/api/employees', asyncHandler(async (req, res) => {
+app.post('/api/employees', (req, res) => {
   const { name, email, department, role, hireDate } = req.body;
   
   // Validation
@@ -136,10 +131,10 @@ app.post('/api/employees', asyncHandler(async (req, res) => {
       hireDate
     });
   });
-}));
+});
 
 // PUT update employee
-app.put('/api/employees/:id', asyncHandler(async (req, res) => {
+app.put('/api/employees/:id', (req, res) => {
   const { id } = req.params;
   const { name, email, department, role, hireDate } = req.body;
   
@@ -189,10 +184,10 @@ app.put('/api/employees/:id', asyncHandler(async (req, res) => {
       hireDate
     });
   });
-}));
+});
 
 // DELETE employee
-app.delete('/api/employees/:id', asyncHandler(async (req, res) => {
+app.delete('/api/employees/:id', (req, res) => {
   const { id } = req.params;
   
   db.run('DELETE FROM employees WHERE id = ?', [id], function(err) {
@@ -209,10 +204,10 @@ app.delete('/api/employees/:id', asyncHandler(async (req, res) => {
     
     res.json({ message: 'Employee deleted successfully' });
   });
-}));
+});
 
 // GET unique departments
-app.get('/api/departments', asyncHandler(async (req, res) => {
+app.get('/api/departments', (req, res) => {
   db.all('SELECT DISTINCT department FROM employees ORDER BY department', [], (err, rows) => {
     if (err) {
       return res.status(500).json({ 
@@ -222,7 +217,7 @@ app.get('/api/departments', asyncHandler(async (req, res) => {
     }
     res.json(rows.map(row => row.department));
   });
-}));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
